@@ -78,6 +78,7 @@ class _EasyDateTimeLineState extends State<EasyDateTimeLine> {
   late ValueNotifier<DateTime?> _focusedDateListener;
 
   DateTime get initialDate => widget.initialDate;
+
   @override
   void initState() {
     // Init easy date timeline locale
@@ -108,7 +109,9 @@ class _EasyDateTimeLineState extends State<EasyDateTimeLine> {
     /// activeDayColor is initialized to the value of widget.activeColor if it is not null,
     /// or to the primary color of the current theme if widget.activeColor is null.
     /// This provides a fallback color if no active color is explicitly provided.
-    final activeDayColor = widget.activeColor ?? Theme.of(context).primaryColor;
+    final activeDayColor = widget.activeColor ?? Theme
+        .of(context)
+        .primaryColor;
 
     /// brightness is initialized to the brightness of the active color or the fallback color,
     /// using the ThemeData.estimateBrightnessForColor method.
@@ -126,62 +129,53 @@ class _EasyDateTimeLineState extends State<EasyDateTimeLine> {
         : Colors.white;
     return ValueListenableBuilder(
       valueListenable: _focusedDateListener,
-      builder: (context, focusedDate, child) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_headerProps.showHeader)
-            Padding(
-              padding: _headerProps.padding ??
-                  const EdgeInsets.only(
-                    left: EasyConstants.timelinePadding * 2,
-                    right: EasyConstants.timelinePadding,
-                    bottom: EasyConstants.timelinePadding,
-                  ),
-              child: Row(
-                mainAxisAlignment: _headerProps.centerHeader == true
-                    ? MainAxisAlignment.center
-                    : MainAxisAlignment.spaceBetween,
-                children: [
-                  SelectedDateWidget(
-                    date: focusedDate ?? initialDate,
+      builder: (context, focusedDate, child) =>
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_headerProps.showHeader)
+                Padding(
+                  padding: _headerProps.padding ??
+                      const EdgeInsets.only(
+                        left: EasyConstants.timelinePadding * 2,
+                        right: EasyConstants.timelinePadding,
+                        bottom: EasyConstants.timelinePadding,
+                      ),
+                  child: _showMonthPicker(pickerType: MonthPickerType.switcher)
+                      ?
+                  EasyMonthSwitcher(
                     locale: widget.locale,
-                    headerProps: _headerProps,
-                  ),
-                  if (_showMonthPicker(pickerType: MonthPickerType.dropDown))
-                    child!,
-                  if (_showMonthPicker(pickerType: MonthPickerType.switcher))
-                    EasyMonthSwitcher(
-                      locale: widget.locale,
-                      value: _easyMonth,
-                      onMonthChange: _onMonthChange,
-                      style: _headerProps.monthStyle,
-                    ),
-                ],
+                    value: _easyMonth,
+                    onMonthChange: _onMonthChange,
+                    style: _headerProps.monthStyle,
+                  )
+                      : null,
+                ),
+              TimeLineWidget(
+                initialDate: initialDate.copyWith(
+                  month: _easyMonth.vale,
+                  day: _initialDay,
+                ),
+                inactiveDates: widget.disabledDates,
+                focusedDate: focusedDate,
+                onDateChange: _onFocusedDateChanged,
+                timeLineProps: widget.timeLineProps,
+                dayProps: widget.dayProps,
+                itemBuilder: widget.itemBuilder,
+                activeDayTextColor: activeDayTextColor,
+                activeDayColor: activeDayColor,
+                locale: widget.locale,
               ),
-            ),
-          TimeLineWidget(
-            initialDate: initialDate.copyWith(
-              month: _easyMonth.vale,
-              day: _initialDay,
-            ),
-            inactiveDates: widget.disabledDates,
-            focusedDate: focusedDate,
-            onDateChange: _onFocusedDateChanged,
-            timeLineProps: widget.timeLineProps,
-            dayProps: widget.dayProps,
-            itemBuilder: widget.itemBuilder,
-            activeDayTextColor: activeDayTextColor,
-            activeDayColor: activeDayColor,
-            locale: widget.locale,
+            ],
           ),
-        ],
-      ),
       child: EasyMonthDropDown(
         value: _easyMonth,
         locale: widget.locale,
         onMonthChange: _onMonthChange,
-        style: _headerProps.monthStyle,
-      ),
+        style: _headerProps.monthStyle
+        ,
+      )
+      ,
     );
   }
 
